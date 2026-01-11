@@ -80,7 +80,7 @@ Engineered with **React 19** and **Vite**, it features a custom physics-based sc
 
 1.  **Clone the repository**
     ```bash
-    git clone [https://github.com/yourusername/bingebox.git](https://github.com/yourusername/bingebox.git)
+    git clone [https://github.com/MAYANK25K/bingebox.git](https://github.com/MAYANK25K/bingebox.git)
     cd bingebox
     ```
 
