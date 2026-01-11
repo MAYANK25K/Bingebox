@@ -1,12 +1,12 @@
 /**
  * @file Row.jsx
- * @brief Reusable row component with 120Hz GPU optimizations & Physics Scrolling.
+ * @brief FINAL COMMIT: Fixed Rendering Glitches (Black UI), Tuned Physics, Smart Filtering.
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, X, Info, Plus, Check } from 'lucide-react';
 import YouTube from 'react-youtube';
 import { useMyList } from './context/MyListContext';
-import { smoothScroll } from './utils/smoothScroll'; // Import the new physics scroller
+import { smoothScroll } from './utils/smoothScroll'; 
 
 const Row = ({ title, fetchUrl, isLargeRow, moviesProp }) => {
     const [movies, setMovies] = useState([]);
@@ -36,6 +36,16 @@ const Row = ({ title, fetchUrl, isLargeRow, moviesProp }) => {
         }
     }, [fetchUrl, moviesProp]);
 
+    // SMART FILTER: Ensures we only render items with valid images.
+    const validMovies = movies.filter(movie => {
+        if (isLargeRow) {
+            return movie.poster_path; // Large rows (Originals) MUST have a poster
+        } else {
+            // Standard rows: Accept Backdrop OR Poster (Fixes Documentaries)
+            return movie.backdrop_path || movie.poster_path;
+        }
+    });
+
     const handleClick = async (movie) => {
         if (trailerUrl) {
             setTrailerUrl("");
@@ -53,7 +63,8 @@ const Row = ({ title, fetchUrl, isLargeRow, moviesProp }) => {
 
     const closePopup = () => { setTrailerUrl(""); setShowError(false); };
 
-    // UPDATED: Use physics-based smooth scroll instead of native behavior
+    // UPDATED: Tuned to 500ms. 
+    // This is the sweet spot: faster than the original (600ms) but retains the "smooth" physics feel.
     const slide = (direction) => {
         if (rowRef.current) {
             const { clientWidth, scrollLeft } = rowRef.current;
@@ -61,12 +72,11 @@ const Row = ({ title, fetchUrl, isLargeRow, moviesProp }) => {
                 ? scrollLeft - clientWidth / 2 
                 : scrollLeft + clientWidth / 2;
             
-            // Reduced duration from 600 to 300 for faster, more responsive scrolling
-            smoothScroll(rowRef.current, targetScroll, 300); 
+            smoothScroll(rowRef.current, targetScroll, 500); 
         }
     };
 
-    if (moviesProp && movies.length === 0) return null;
+    if (validMovies.length === 0) return null;
 
     return (
         <>
@@ -83,36 +93,33 @@ const Row = ({ title, fetchUrl, isLargeRow, moviesProp }) => {
                         <ChevronLeft size={40} />
                     </button>
 
-                    <div ref={rowRef} className="flex gap-2 md:gap-4 overflow-x-scroll scroll-smooth items-center py-2 pr-12 no-scrollbar">
-                        {movies.map(movie => {
-                            // FIX: Added fallback logic. If backdrop is missing, use poster. 
-                            // This fixes the "missing" or "not loaded" images for documentaries/obscure titles.
+                    <div ref={rowRef} className="flex gap-2 md:gap-4 overflow-x-scroll items-center py-2 pr-12 no-scrollbar transform-gpu">
+                        {validMovies.map(movie => {
+                            // Smart Path Selection
                             const imagePath = isLargeRow 
                                 ? movie.poster_path 
                                 : (movie.backdrop_path || movie.poster_path);
-
-                            if (!imagePath) return null;
+                            
                             const isAdded = isInMyList(movie.id);
 
                             return (
                                 <div
                                     key={movie.id}
                                     onClick={() => handleClick(movie)}
-                                    // GPU Optimization: will-change-transform acts as a hint to the browser
+                                    // FIXED: Removed 'will-change-transform'. 
+                                    // This fixes the bug where images stayed black until hovered.
                                     className={`
                                         relative flex-none 
                                         transition-transform duration-300 ease-out 
                                         cursor-pointer 
                                         hover:scale-105 hover:z-50 
                                         rounded-[4px] overflow-hidden group/item
-                                        will-change-transform
                                         ${isLargeRow ? "h-[250px] md:h-[320px] w-[160px] md:w-[215px]" : "h-[120px] md:h-[160px] w-[200px] md:w-[280px]"}
                                     `}
                                 >
                                     <img
-                                        // PERFORMANCE: Async decoding prevents UI freeze during rapid scrolling
                                         decoding="async"
-                                        loading="eager"
+                                        loading="eager" // Ensures instant painting
                                         className="w-full h-full object-cover"
                                         src={`${isLargeRow ? POSTER_BASE_URL : IMAGE_BASE_URL}${imagePath}`}
                                         alt={movie.title || movie.name}
