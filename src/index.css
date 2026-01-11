@@ -1,0 +1,173 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Netflix Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+body {
+  @apply bg-black text-white antialiased overflow-x-hidden;
+}
+
+/* --- GLOBAL CURSOR FIX --- */
+/* Ensures all buttons and interactive elements show the pointer */
+button, a, [role="button"], .cursor-pointer {
+  cursor: pointer !important;
+}
+
+/* --- PERFORMANCE OPTIMIZATION --- */
+.gpu-accel {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+/* --- SCROLLBAR HIDING --- */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ... (Rest of your existing CSS for animations and modals) ... */
+
+/* --- NETFLIX ANIMATION --- */
+@keyframes n-zoom {
+  0% { transform: scale(1); opacity: 0; }
+  10% { opacity: 1; }
+  100% { transform: scale(30); opacity: 0; }
+}
+
+.animate-netflix-zoom {
+  animation: n-zoom 3.5s cubic-bezier(0.645, 0.045, 0.355, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* --- MODERN APPLE UI: GLASS MODALS --- */
+
+@keyframes overlayFadeIn {
+  0% { opacity: 0; backdrop-filter: blur(0px); }
+  100% { opacity: 1; backdrop-filter: blur(20px); }
+}
+
+@keyframes modalSpringUp {
+  0% { transform: scale(0.92) translateY(15px); opacity: 0; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.security-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4); /* Lighter bg to show off the blur */
+  backdrop-filter: blur(20px) saturate(180%); /* Apple 'Material' Blur */
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: overlayFadeIn 0.4s ease-out forwards;
+}
+
+.security-modal {
+  /* The 'Deep Glass' Look */
+  background: rgba(28, 28, 30, 0.75); /* High translucency */
+  border: 1px solid rgba(255, 255, 255, 0.12); /* Subtle glass edge */
+  box-shadow: 
+    0 0 0 1px rgba(0,0,0,0.2), /* Definition line */
+    0 40px 80px -20px rgba(0,0,0,0.8); /* Deep shadow for float effect */
+  border-radius: 28px; /* Super rounded Apple corners */
+  padding: 32px 28px;
+  text-align: center;
+  max-width: 380px;
+  width: 85%;
+  color: white;
+  animation: modalSpringUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  position: relative;
+  overflow: hidden;
+}
+
+/* --- TRAILER MODE OVERRIDES --- */
+.trailer-mode {
+  padding: 0;
+  max-width: 900px;
+  width: 95%;
+  background: black; /* Trailers need pure black */
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.trailer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  background: rgba(40, 40, 42, 0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.trailer-container {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #000;
+  position: relative;
+}
+
+.trailer-container iframe {
+  width: 100%;
+  height: 100%;
+  pointer-events: auto !important;
+}
+
+/* --- TYPOGRAPHY & ELEMENTS --- */
+.security-icon-container {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Background is set inline for specific colors */
+}
+
+.security-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+  color: #fff;
+}
+
+.security-desc {
+  font-size: 15px;
+  color: #98989d; /* Apple secondary label */
+  margin-bottom: 28px;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+.security-btn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px; /* iOS button style */
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  transition: transform 0.2s, filter 0.2s;
+  border: none;
+  cursor: pointer;
+  background: #323232; /* Default fallback */
+  color: white;
+}
+
+.security-btn:active {
+  transform: scale(0.97);
+  filter: brightness(0.9);
+}
+
+/* src/index.css */
+@layer utilities {
+  .will-change-transform {
+    will-change: transform;
+    /* Hardware acceleration hack to force a new layer */
+    transform: translateZ(0); 
+    backface-visibility: hidden;
+  }
+}
