@@ -1,12 +1,12 @@
 /**
  * @file Row.jsx
- * @brief Reusable row component with Smart Filtering, Instant Load & Fast Physics.
+ * @brief Reusable row component with 120Hz GPU optimizations & Physics Scrolling.
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, X, Info, Plus, Check } from 'lucide-react';
 import YouTube from 'react-youtube';
 import { useMyList } from './context/MyListContext';
-import { smoothScroll } from './utils/smoothScroll'; 
+import { smoothScroll } from './utils/smoothScroll'; // Import the new physics scroller
 
 const Row = ({ title, fetchUrl, isLargeRow, moviesProp }) => {
     const [movies, setMovies] = useState([]);
@@ -36,16 +36,6 @@ const Row = ({ title, fetchUrl, isLargeRow, moviesProp }) => {
         }
     }, [fetchUrl, moviesProp]);
 
-    // 1. SMART FILTER: Create a clean list of valid movies BEFORE rendering.
-    // This ensures we NEVER render a "black" or "empty" slot.
-    const validMovies = movies.filter(movie => {
-        // If it's a Large Row, we MUST have a poster.
-        // If it's a Standard Row, we prefer Backdrop, but accept Poster (fixes Documentaries).
-        return isLargeRow 
-            ? movie.poster_path 
-            : (movie.backdrop_path || movie.poster_path);
-    });
-
     const handleClick = async (movie) => {
         if (trailerUrl) {
             setTrailerUrl("");
@@ -63,7 +53,7 @@ const Row = ({ title, fetchUrl, isLargeRow, moviesProp }) => {
 
     const closePopup = () => { setTrailerUrl(""); setShowError(false); };
 
-    // 2. FAST SCROLL: Kept at 300ms for snappy desktop feel
+    // UPDATED: Use physics-based smooth scroll instead of native behavior
     const slide = (direction) => {
         if (rowRef.current) {
             const { clientWidth, scrollLeft } = rowRef.current;
@@ -71,12 +61,12 @@ const Row = ({ title, fetchUrl, isLargeRow, moviesProp }) => {
                 ? scrollLeft - clientWidth / 2 
                 : scrollLeft + clientWidth / 2;
             
+            // Reduced duration from 600 to 300 for faster, more responsive scrolling
             smoothScroll(rowRef.current, targetScroll, 300); 
         }
     };
 
-    // If no valid movies exist after filtering, don't render the row at all.
-    if (validMovies.length === 0) return null;
+    if (moviesProp && movies.length === 0) return null;
 
     return (
         <>
@@ -94,13 +84,14 @@ const Row = ({ title, fetchUrl, isLargeRow, moviesProp }) => {
                     </button>
 
                     <div ref={rowRef} className="flex gap-2 md:gap-4 overflow-x-scroll scroll-smooth items-center py-2 pr-12 no-scrollbar">
-                        {/* Map over validMovies only */}
-                        {validMovies.map(movie => {
-                            // Determine the best available image
+                        {movies.map(movie => {
+                            // FIX: Added fallback logic. If backdrop is missing, use poster. 
+                            // This fixes the "missing" or "not loaded" images for documentaries/obscure titles.
                             const imagePath = isLargeRow 
                                 ? movie.poster_path 
                                 : (movie.backdrop_path || movie.poster_path);
-                            
+
+                            if (!imagePath) return null;
                             const isAdded = isInMyList(movie.id);
 
                             return (
@@ -119,7 +110,7 @@ const Row = ({ title, fetchUrl, isLargeRow, moviesProp }) => {
                                     `}
                                 >
                                     <img
-                                        // 3. INSTANT LOAD: 'eager' prevents black flicker/empty spaces
+                                        // PERFORMANCE: Async decoding prevents UI freeze during rapid scrolling
                                         decoding="async"
                                         loading="eager"
                                         className="w-full h-full object-cover"
