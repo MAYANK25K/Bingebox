@@ -1,6 +1,6 @@
 /**
  * @file Row.jsx
- * @brief FINAL COMMIT: Fixed Rendering Glitches (Black UI), Tuned Physics, Smart Filtering.
+ * @brief FINAL COMMIT: Fixed Rendering Glitches, Smart Filtering & Modal Strict Mode.
  */
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, X, Info, Plus, Check } from 'lucide-react';
@@ -39,9 +39,8 @@ const Row = ({ title, fetchUrl, isLargeRow, moviesProp }) => {
     // SMART FILTER: Ensures we only render items with valid images.
     const validMovies = movies.filter(movie => {
         if (isLargeRow) {
-            return movie.poster_path; // Large rows (Originals) MUST have a poster
+            return movie.poster_path; 
         } else {
-            // Standard rows: Accept Backdrop OR Poster (Fixes Documentaries)
             return movie.backdrop_path || movie.poster_path;
         }
     });
@@ -63,8 +62,7 @@ const Row = ({ title, fetchUrl, isLargeRow, moviesProp }) => {
 
     const closePopup = () => { setTrailerUrl(""); setShowError(false); };
 
-    // UPDATED: Tuned to 500ms. 
-    // This is the sweet spot: faster than the original (600ms) but retains the "smooth" physics feel.
+    // Tuned to 500ms for smooth physics scroll
     const slide = (direction) => {
         if (rowRef.current) {
             const { clientWidth, scrollLeft } = rowRef.current;
@@ -95,7 +93,6 @@ const Row = ({ title, fetchUrl, isLargeRow, moviesProp }) => {
 
                     <div ref={rowRef} className="flex gap-2 md:gap-4 overflow-x-scroll items-center py-2 pr-12 no-scrollbar transform-gpu">
                         {validMovies.map(movie => {
-                            // Smart Path Selection
                             const imagePath = isLargeRow 
                                 ? movie.poster_path 
                                 : (movie.backdrop_path || movie.poster_path);
@@ -106,8 +103,7 @@ const Row = ({ title, fetchUrl, isLargeRow, moviesProp }) => {
                                 <div
                                     key={movie.id}
                                     onClick={() => handleClick(movie)}
-                                    // FIXED: Removed 'will-change-transform'. 
-                                    // This fixes the bug where images stayed black until hovered.
+                                    // Removed 'will-change-transform' to fix Black UI glitch
                                     className={`
                                         relative flex-none 
                                         transition-transform duration-300 ease-out 
@@ -119,7 +115,7 @@ const Row = ({ title, fetchUrl, isLargeRow, moviesProp }) => {
                                 >
                                     <img
                                         decoding="async"
-                                        loading="eager" // Ensures instant painting
+                                        loading="eager"
                                         className="w-full h-full object-cover"
                                         src={`${isLargeRow ? POSTER_BASE_URL : IMAGE_BASE_URL}${imagePath}`}
                                         alt={movie.title || movie.name}
@@ -151,7 +147,8 @@ const Row = ({ title, fetchUrl, isLargeRow, moviesProp }) => {
             </div>
 
             {trailerUrl && (
-                <div className="security-overlay" onClick={closePopup}>
+                // FIX: Removed onClick={closePopup} from background overlay
+                <div className="security-overlay">
                     <div className="security-modal trailer-mode" onClick={(e) => e.stopPropagation()}>
                         <div className="trailer-header">
                             <span className="text-white font-semibold text-sm">Playing Trailer</span>
@@ -170,7 +167,8 @@ const Row = ({ title, fetchUrl, isLargeRow, moviesProp }) => {
                 </div>
             )}
             {showError && (
-                 <div className="security-overlay" onClick={closePopup}>
+                 // FIX: Removed onClick={closePopup} from background overlay
+                 <div className="security-overlay">
                     <div className="security-modal" onClick={(e) => e.stopPropagation()}>
                         <div className="mx-auto mt-4 mb-4 w-14 h-14 flex items-center justify-center rounded-full bg-red-500/10">
                             <Info className="text-red-500 w-8 h-8" />
