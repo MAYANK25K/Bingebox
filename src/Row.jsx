@@ -6,7 +6,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, X, Info, Plus, Check } from 'lucide-react';
 import YouTube from 'react-youtube';
 import { useMyList } from './context/MyListContext';
-import { smoothScroll } from './utils/smoothScroll'; // Import the new physics scroller
+import { smoothScroll } from './utils/smoothScroll';
 
 const Row = ({ title, fetchUrl, isLargeRow, moviesProp }) => {
     const [movies, setMovies] = useState([]);
@@ -53,15 +53,22 @@ const Row = ({ title, fetchUrl, isLargeRow, moviesProp }) => {
 
     const closePopup = () => { setTrailerUrl(""); setShowError(false); };
 
-    // UPDATED: Use physics-based smooth scroll instead of native behavior
+    // FIX: "Instant" Feel Settings
     const slide = (direction) => {
         if (rowRef.current) {
             const { clientWidth, scrollLeft } = rowRef.current;
-            const targetScroll = direction === 'left' 
-                ? scrollLeft - clientWidth / 2 
-                : scrollLeft + clientWidth / 2;
             
-            smoothScroll(rowRef.current, targetScroll, 600); // 600ms duration for "heavy" feel
+            // OPTIMIZATION 1: Scroll FULL width (clientWidth) instead of half. 
+            // This covers more ground per click, making it feel "faster".
+            const scrollAmount = clientWidth * 0.95; // 95% width to leave a peek of previous movie
+
+            const targetScroll = direction === 'left' 
+                ? scrollLeft - scrollAmount 
+                : scrollLeft + scrollAmount;
+            
+            // OPTIMIZATION 2: 200ms is the "Goldilocks" zone for UI snaps.
+            // Fast enough to feel instant, slow enough to see the motion.
+            smoothScroll(rowRef.current, targetScroll, 200); 
         }
     };
 
@@ -82,7 +89,11 @@ const Row = ({ title, fetchUrl, isLargeRow, moviesProp }) => {
                         <ChevronLeft size={40} />
                     </button>
 
-                    <div ref={rowRef} className="flex gap-2 md:gap-4 overflow-x-scroll scroll-smooth items-center py-2 pr-12 no-scrollbar">
+                    <div 
+                        ref={rowRef} 
+                        // CSS: snap-x mandatory ensures native swipe feels good too
+                        className="flex gap-2 md:gap-4 overflow-x-scroll scroll-smooth items-center py-2 pr-12 no-scrollbar snap-x mandatory"
+                    >
                         {movies.map(movie => {
                             const imagePath = isLargeRow ? movie.poster_path : movie.backdrop_path;
                             if (!imagePath) return null;
@@ -92,10 +103,10 @@ const Row = ({ title, fetchUrl, isLargeRow, moviesProp }) => {
                                 <div
                                     key={movie.id}
                                     onClick={() => handleClick(movie)}
-                                    // GPU Optimization: will-change-transform acts as a hint to the browser
+                                    // snap-start ensures images align perfectly after scrolling
                                     className={`
-                                        relative flex-none 
-                                        transition-transform duration-300 ease-out 
+                                        relative flex-none snap-start
+                                        transition-transform duration-200 ease-out 
                                         cursor-pointer 
                                         hover:scale-105 hover:z-50 
                                         rounded-[4px] overflow-hidden group/item
@@ -104,7 +115,6 @@ const Row = ({ title, fetchUrl, isLargeRow, moviesProp }) => {
                                     `}
                                 >
                                     <img
-                                        // PERFORMANCE: Async decoding prevents UI freeze during rapid scrolling
                                         decoding="async"
                                         loading="lazy"
                                         className="w-full h-full object-cover"

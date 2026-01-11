@@ -1,5 +1,8 @@
 # BingeBox 🎥
 
+[![Live Demo](https://img.shields.io/badge/Demo-Live_App-2ea44f?style=for-the-badge&logo=vercel)](https://bingebox-psi.vercel.app/)  
+**[🔗 BingeBox | Unlimited Streaming](https://bingebox-psi.vercel.app/)**
+
 ![React](https://img.shields.io/badge/React-19.0-blue?logo=react&style=for-the-badge)
 ![Vite](https://img.shields.io/badge/Vite-7.0-purple?logo=vite&style=for-the-badge)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind_v4-06B6D4?logo=tailwindcss&style=for-the-badge)
