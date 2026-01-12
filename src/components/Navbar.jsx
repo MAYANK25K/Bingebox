@@ -5,9 +5,9 @@ const Navbar = () => {
     <nav className="absolute top-0 w-full z-50 p-6">
       <div className="max-w-300 mx-auto flex justify-between items-center">
         
-        {/* Logo - Adjusted height for consistency */}
+        {/* Logo - Updated to use local asset for security */}
         <img 
-          src="https://upload.wikimedia.org/wikipedia/commons/7/7a/Logonetflix.png" 
+          src="/assets/netflix-logo.png" 
           alt="Netflix Logo" 
           className="h-8 md:h-10 lg:h-12" 
         />
@@ -28,7 +28,7 @@ const Navbar = () => {
 
           {/* Sign In Button */}
           {/* FORCED HEIGHT: h-[32px] to match the dropdown */}
-          <button className="h-8 bg-[#E50914] text-white px-4 rounded font-bold text-sm hover:bg-[#c11119] transition duration-200 whitespace-nowrap">
+          <button type="button" className="h-8 bg-[#E50914] text-white px-4 rounded font-bold text-sm hover:bg-[#c11119] transition duration-200 whitespace-nowrap">
             Sign In
           </button>
         </div>

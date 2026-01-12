@@ -102,10 +102,13 @@ const FAQ = ({ onGetStarted }) => {
         <div className="flex flex-col md:flex-row gap-3 justify-center items-center w-full">
           <div className="relative w-full md:flex-1">
              <input 
-              type="email" 
+              type="text" 
+              name="demo_email_input"
+              id="demo_email_faq"
+              autoComplete="off"
               placeholder="Email address" 
               className="w-full h-12 md:h-14 px-4 bg-black/40 border border-gray-500/70 rounded text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-white transition backdrop-blur-sm"
-            />
+              />
           </div>
           
           {/* The "Get Started" button triggers the `onGetStarted` prop function. */}

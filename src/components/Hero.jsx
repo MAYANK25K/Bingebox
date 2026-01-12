@@ -40,7 +40,10 @@ const Hero = ({ onGetStarted }) => {
         {/* Input Form */}
         <div className="mt-6 flex flex-col md:flex-row gap-3 w-full max-w-3xl px-4">
           <input 
-            type="email" 
+            type="text" 
+            name="demo_email_input"
+            id="demo_email_hero"
+            autoComplete="off"
             placeholder="Email address" 
             className="flex-1 bg-black/40 border border-gray-500/70 text-white p-4 rounded text-base placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-white transition bg-opacity-40 backdrop-blur-sm"
           />
